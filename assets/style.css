@@ -19,10 +19,18 @@ h2 {
   line-height: 1.2;
 }
 
-mjx-container[display="true"] {
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 1.75rem auto 0.75rem;
+}
+
+pre {
   overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0.5rem 0;
+  padding: 1rem;
+  border-radius: 0.4rem;
+  background: #f6f8fa;
 }
 
 a {
@@ -30,6 +38,10 @@ a {
 }
 
 @media (prefers-color-scheme: dark) {
+  pre {
+    background: #161b22;
+  }
+
   a {
     color: #58a6ff;
   }
