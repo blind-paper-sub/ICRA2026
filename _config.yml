@@ -1,0 +1,8 @@
+title: Anonymous Project Page
+description: Supplementary material for an anonymous research submission
+lang: en
+markdown: kramdown
+
+exclude:
+  - README.md
+  - .gitignore
