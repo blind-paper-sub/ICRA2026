@@ -7,7 +7,7 @@ title: Anonymous Project Page
 
 This page accompanies an anonymous research submission.
 
-### SIMTT Implementation Details
+## SIMTT Implementation Details
 
 The implementation also includes parallel optimizations. Training proceeds
 through three distinct phases:
