@@ -7,7 +7,7 @@ title: Anonymous Project Page
 
 This page accompanies an anonymous research submission.
 
-## SIMTT Implementation Details
+## SIMTT Parallel Implementation Details
 
 The implementation also includes parallel optimizations. Training proceeds
 through three distinct phases:
@@ -35,7 +35,7 @@ through three distinct phases:
 *Parallel SIMTT implementation. Each rank updates its local teacher; decoder
 and student gradients are aggregated across ranks using All-Reduce.*
 
-## Action Variance
+## SIMTT Action Variance
 
 Following the reasoning of Messikommer et al.[^messikommer], we associate the
 action outputs of each teacher and of the student with multivariate Gaussians of
