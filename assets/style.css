@@ -29,11 +29,10 @@ img {
   margin: 1.75rem auto 0.75rem;
 }
 
-pre {
+mjx-container[display="true"] {
   overflow-x: auto;
-  padding: 1rem;
-  border-radius: 0.4rem;
-  background: #f6f8fa;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
 }
 
 a {
@@ -41,10 +40,6 @@ a {
 }
 
 @media (prefers-color-scheme: dark) {
-  pre {
-    background: #161b22;
-  }
-
   a {
     color: #58a6ff;
   }
