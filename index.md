@@ -52,16 +52,13 @@ $$\boldsymbol{\Sigma}_S \equiv \boldsymbol{\Sigma}_{T_i}$$ on a per-teacher basi
 With these hypothesis, the KL-divergence becomes:
 
 $$
-\begin{aligned}
 D_{KL}^{(i)}(s_t)
-&= \tfrac{1}{2}
+= \tfrac{1}{2}
 \bigl(\boldsymbol{\mu}_{T_i}(s_t)
 - \boldsymbol{\mu}_S(s_t)\bigr)^{\!\top}
-\boldsymbol{\Sigma}_{T_i}^{-1} \\
-&\quad \times
+\boldsymbol{\Sigma}_{T_i}^{-1}
 \bigl(\boldsymbol{\mu}_{T_i}(s_t)
 - \boldsymbol{\mu}_S(s_t)\bigr).
-\end{aligned}
 $$
 
 This is the expression actually used in the rollout penalty and in the
