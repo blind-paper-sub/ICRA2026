@@ -34,33 +34,6 @@ through three distinct phases:
 *Parallel SIMTT implementation. Each rank updates its local teacher; decoder
 and student gradients are aggregated across ranks using All-Reduce.*
 
-## Rollout Subsample Ratio and Time Savings
-
-The **rollout subsample ratio** is the fraction of parallel-environment
-trajectories from each collected rollout that are replayed during student
-alignment. A ratio of `1.0` uses every trajectory, whereas `0.5` randomly uses
-half of them. With 4096 environments per rank in our final configuration, this
-means replaying 2048 trajectories per rank. The full rollout is still collected
-and remains available for the PPO update; subsampling only reduces the alignment
-workload.
-
-We compared `rollout_subsample_ratio=0.5` with `1.0` using two runs per setting.
-Total iteration time is defined as collection time plus learning time:
-
-| Method and timing window | Ratio `1.0` | Ratio `0.5` | Observed saving |
-|:--|--:|--:|--:|
-| SIMTT, mean after iteration 100 | 8.263 s | 7.223 s | 12.6% |
-| SIMTT, final 1000 iterations | 8.187 s | 7.650 s | 6.6% |
-| SITT, mean after iteration 100 | 8.317 s | 6.651 s | 20.0% |
-| SITT, final 1000 iterations | 8.170 s | 6.507 s | 20.4% |
-
-The alignment time itself was 30.9–37.8% lower for SIMTT and 45.8–46.0% lower
-for SITT. Reward and timeout rate remained comparable in these runs, and even
-after subsampling the number of alignment episodes remained substantially
-larger than in the original SITT formulation. These are empirical estimates:
-the runs were executed on different cluster hosts, rather than as a same-node
-controlled benchmark.
-
 ## SIMTT Action Variance
 
 Following the reasoning of Messikommer et al.[^messikommer], we associate the
@@ -125,6 +98,62 @@ parameter, this exploration pressure is adapted independently to each task,
 rather than being averaged across all of them as it would be with a single
 shared $$\boldsymbol{\Sigma}_T$$.
 
+## SITT/SIMTT Rollout Subsample Ratio
+
+The **rollout subsample ratio** is the fraction of parallel-environment
+trajectories from each fully collected rollout that are replayed during each
+student-alignment epoch. A ratio of `1.0` uses every trajectory, whereas `0.5`
+samples half of them at random. Rollout collection and the teacher PPO update
+still use all environments; subsampling only reduces the repeated alignment
+workload, with the goal of saving training time while retaining comparable
+performance. In our final configuration, `0.5` selects 2048 of the 4096
+trajectories per rank and alignment epoch.
+
+This remains a comparatively large alignment budget. In the original SITT
+paper's Isaac Gym manipulation experiment (Appendix A.1.3, p. 15), only 128 of
+4096 parallel environments rendered student images for paired alignment at each
+timestep (3.125%).[^messikommer] Those streams used a 16-step horizon and fed a
+rolling buffer of 100,000 samples. Each of our alignment epochs instead replays
+2048 collected environment streams per rank—16 times the original number of
+image-generating streams. These counts describe data scale, not identical
+operations: the original subset controls paired-observation rendering into a
+FIFO buffer, whereas our ratio controls post-collection replay from a fully
+collected rollout. The comparison is therefore not a like-for-like compute
+benchmark.
+
+**Observed time savings.** We compared `rollout_subsample_ratio=0.5` with `1.0`
+using two runs per setting. Total iteration time is collection time plus
+learning time:
+
+| Method and timing window | Ratio `1.0` | Ratio `0.5` | Saved per iteration |
+|:--|--:|--:|--:|
+| SIMTT, mean after iteration 100 | 8.263 s | 7.223 s | 1.040 s (12.6%) |
+| SIMTT, final 1000 iterations | 8.187 s | 7.649 s | 0.538 s (6.6%) |
+| SITT, mean after iteration 100 | 8.317 s | 6.651 s | 1.666 s (20.0%) |
+| SITT, final 1000 iterations | 8.170 s | 6.507 s | 1.663 s (20.4%) |
+
+The alignment time itself was 30.9–37.8% lower for SIMTT and 45.8–46.0% lower
+for SITT.
+
+**Training-performance check.** To compare the policies at the same training
+progress, we averaged the common iteration window from 8500 through 9500,
+inclusive, over the two runs in each setting. Each cell reports ratio
+`1.0` → `0.5`:
+
+| Method | Mean reward | Episode length | Timeout rate |
+|:--|--:|--:|--:|
+| SIMTT | 115.50 → 119.50 | 459.66 → 460.79 | 0.8762 → 0.8869 |
+| SITT | 93.74 → 94.69 | 383.91 → 387.53 | 0.8151 → 0.8157 |
+
+The averaged logged metrics remained comparable at ratio `0.5`; in particular,
+mean reward did not decrease for either method. The final SIMTT curriculum level
+was `8.0` in both settings, while mean SITT curriculum mastery was `0.917` in
+both. The evidence therefore supports no observed loss in training performance
+alongside the lower iteration time. It does not establish strict statistical
+equivalence or matched deployment performance: there are only two runs per
+setting, they ran on different cluster hosts, SITT has high between-run
+variance, and no matching ratio-`0.5` deployment benchmark was recovered.
+
 [^messikommer]: N. Messikommer, J. Xing, E. Aljalbout, and D. Scaramuzza,
-    “Student-Informed Teacher Training,” *International Conference on Learning
-    Representations (ICLR)*, 2025.
+    [“Student-Informed Teacher Training”](https://proceedings.iclr.cc/paper_files/paper/2025/file/a8223b0ad64007423ffb308b0dd92298-Paper-Conference.pdf),
+    *International Conference on Learning Representations (ICLR)*, 2025.
