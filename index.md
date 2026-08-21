@@ -1,11 +1,10 @@
 ---
 layout: default
-title: Anonymous Project Page
+title: Enabling Wheeled-Legged Robot Parkour via Reinforcement Practice and Lessons Learned
 ---
 
-# Anonymous Project Page
+# Enabling Wheeled-Legged Robot Parkour via Reinforcement Practice and Lessons Learned
 
-This page accompanies an anonymous research submission.
 
 ## SIMTT Parallel Implementation Details
 
