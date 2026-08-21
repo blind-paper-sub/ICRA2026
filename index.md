@@ -35,6 +35,33 @@ through three distinct phases:
 *Parallel SIMTT implementation. Each rank updates its local teacher; decoder
 and student gradients are aggregated across ranks using All-Reduce.*
 
+## Rollout Subsample Ratio and Time Savings
+
+The **rollout subsample ratio** is the fraction of parallel-environment
+trajectories from each collected rollout that are replayed during student
+alignment. A ratio of `1.0` uses every trajectory, whereas `0.5` randomly uses
+half of them. With 4096 environments per rank in our final configuration, this
+means replaying 2048 trajectories per rank. The full rollout is still collected
+and remains available for the PPO update; subsampling only reduces the alignment
+workload.
+
+We compared `rollout_subsample_ratio=0.5` with `1.0` using two runs per setting.
+Total iteration time is defined as collection time plus learning time:
+
+| Method and timing window | Ratio `1.0` | Ratio `0.5` | Observed saving |
+|:--|--:|--:|--:|
+| SIMTT, mean after iteration 100 | 8.263 s | 7.223 s | 12.6% |
+| SIMTT, final 1000 iterations | 8.187 s | 7.650 s | 6.6% |
+| SITT, mean after iteration 100 | 8.317 s | 6.651 s | 20.0% |
+| SITT, final 1000 iterations | 8.170 s | 6.507 s | 20.4% |
+
+The alignment time itself was 30.9–37.8% lower for SIMTT and 45.8–46.0% lower
+for SITT. Reward and timeout rate remained comparable in these runs, and even
+after subsampling the number of alignment episodes remained substantially
+larger than in the original SITT formulation. These are empirical estimates:
+the runs were executed on different cluster hosts, rather than as a same-node
+controlled benchmark.
+
 ## SIMTT Action Variance
 
 Following the reasoning of Messikommer et al.[^messikommer], we associate the
