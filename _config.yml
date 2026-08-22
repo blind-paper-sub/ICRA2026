@@ -2,6 +2,9 @@ title: Anonymous Project Page
 description: Supplementary material for an anonymous research submission
 lang: en
 markdown: kramdown
+url: "https://blind-paper-sub.github.io"
+baseurl: "/Wheeled-Legged-Robot-Parkour"
+repository: "blind-paper-sub/Wheeled-Legged-Robot-Parkour"
 
 exclude:
   - README.md
